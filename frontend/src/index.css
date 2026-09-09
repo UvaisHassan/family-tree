@@ -1,0 +1,593 @@
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+  background: #f7f7f7;
+}
+
+#root {
+  padding: 32px 40px;
+}
+
+h1 {
+  margin: 0 0 12px;
+  font-size: 22px;
+  line-height: 1.2;
+}
+
+.main-layout {
+  display: flex;
+  align-items: flex-start;
+  gap: 40px;
+}
+
+.tree {
+  flex: 1;
+  min-width: 0;
+  overflow-x: auto;
+  padding: 10px;
+}
+
+.tree > .person {
+  width: fit-content;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.tree-zoom-controls {
+  position: sticky;
+  left: 0;
+  z-index: 10;
+  display: flex;
+  gap: 4px;
+  margin-bottom: 8px;
+}
+
+.tree-zoom-controls button {
+  min-width: 28px;
+  padding: 5px 8px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  background: white;
+  color: #333;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.tree-zoom-controls button:hover {
+  background: #f0f0f0;
+}
+
+.tree-content {
+  width: max-content;
+  transform-origin: top center;
+}
+
+.person {
+  margin: 6px 8px;
+  position: relative;
+}
+
+.person-card {
+  box-sizing: border-box;
+  width: 135px;
+  padding: 7px 10px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  background: white;
+  text-align: center;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  cursor: pointer;
+  transition: box-shadow 0.15s ease;
+}
+
+.person-card:hover {
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12);
+}
+
+.person-card.selected {
+  border: 1px solid #333;
+  outline: 2px solid #333;
+  outline-offset: 2px;
+  background: #fafafa;
+}
+
+.person-name {
+  font-size: 16px;
+  font-weight: bold;
+  margin-bottom: 3px;
+}
+
+.person-age {
+  font-size: 13px;
+  color: #666;
+}
+
+.person-gender {
+  margin-top: 3px;
+  font-size: 11px;
+  color: #888;
+  text-transform: capitalize;
+}
+
+.children {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  gap: 6px;
+  padding-top: 10px;
+  width: fit-content;
+  margin: 0 auto;
+}
+
+.children::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 50%;
+  width: 2px;
+  height: 11px;
+  background: #ccc;
+}
+
+.children::after {
+  content: "";
+  position: absolute;
+  top: 15px;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: #ccc;
+}
+
+.children > .person::before {
+  content: "";
+  position: absolute;
+  top: -10px;
+  left: 50%;
+  width: 2px;
+  height: 10px;
+  background: #ccc;
+}
+
+.couple {
+  display: flex;
+  gap: 4px;
+  align-items: center;
+  justify-content: center;
+}
+
+.person-details {
+  position: sticky;
+  top: 16px;
+  align-self: flex-start;
+  flex: 0 0 260px;
+  box-sizing: border-box;
+  margin-top: 40px;
+  width: 300px;
+  padding: 16px;
+  border: 1px solid #ddd;
+  border-radius: 16px;
+  background: white;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+}
+
+.person-details h2 {
+  margin-top: 0;
+}
+
+.person-details h3 {
+  margin-bottom: 8px;
+}
+
+.person-details button {
+  cursor: pointer;
+  font-size: 13px;
+}
+
+.person-details-header {
+  margin-bottom: 12px;
+}
+
+.person-details-header h2 {
+  margin: 0 0 6px 0;
+}
+
+.person-details-header p {
+  margin: 0;
+  color: #666;
+  font-size: 14px;
+}
+
+.person-actions {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 16px;
+}
+
+.relationship-section {
+  margin-top: 16px;
+  padding-top: 12px;
+  padding-bottom: 2px;
+  border-top: 1px solid #eee;
+}
+
+.relationship-section h3 {
+  font-size: 15px;
+  font-weight: 600;
+  color: #333;
+  margin-top: 0;
+  margin-bottom: 10px;
+}
+
+.delete-button {
+  display: inline-block;
+  margin-top: 16px;
+  padding: 6px 10px;
+  border: 1px solid #e0b4b4;
+  border-radius: 6px;
+  background: #fff5f5;
+  color: #c62828;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.delete-button:hover {
+  background: #ffe8e8;
+}
+
+.person-link {
+  display: block;
+  margin: 2px 0;
+  padding: 4px 6px;
+  border: none;
+  border-radius: 6px;
+  background: none;
+  color: #333;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 500;
+  text-align: left;
+}
+
+.person-link:hover {
+  background: #f5f5f5;
+}
+
+.person-link:focus-visible {
+  outline: 2px solid #333;
+  outline-offset: 1px;
+}
+
+.action-button {
+  display: inline-block;
+  margin: 6px 0;
+  padding: 5px 9px;
+  border: 1px solid #d5d5d5;
+  border-radius: 6px;
+  background: #f7f7f7;
+  color: #444;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.action-button:hover {
+  background: #ededed;
+}
+
+.primary-action-button {
+  display: inline-block;
+  padding: 6px 10px;
+  border: 1px solid #333;
+  border-radius: 6px;
+  background: #333;
+  color: white;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.primary-action-button:hover {
+  background: #222;
+}
+
+.primary-button {
+  display: inline-block;
+  margin-bottom: 16px;
+  padding: 6px 10px;
+  border: 1px solid #333;
+  border-radius: 6px;
+  background: #333;
+  color: white;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.primary-button:hover {
+  background: #222;
+}
+
+.add-person-section {
+  width: 300px;
+  box-sizing: border-box;
+  margin-bottom: 24px;
+  padding: 16px;
+  border: 1px solid #eee;
+  border-radius: 10px;
+  background: #fafafa;
+}
+
+.add-person-section h3 {
+  margin-top: 0;
+  margin-bottom: 12px;
+}
+
+.add-person-section input[type="text"],
+.add-person-section input[type="number"] {
+  display: block;
+  box-sizing: border-box;
+  width: 100%;
+  max-width: 300px;
+  margin: 6px 0 12px;
+  padding: 9px 10px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  background: white;
+  font-size: 14px;
+  outline: none;
+}
+
+.add-person-section input[type="text"]:focus,
+.add-person-section input[type="number"]:focus {
+  border-color: #999;
+  box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.06);
+}
+
+.add-person-section label {
+  display: block;
+  margin-bottom: 12px;
+  font-size: 14px;
+  color: #555;
+}
+
+.add-person-section select {
+  display: block;
+  box-sizing: border-box;
+  width: 100%;
+  max-width: 300px;
+  margin-top: 6px;
+  padding: 9px 10px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  background: white;
+  color: #333;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.add-person-section h4 {
+  margin: 20px 0 10px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #333;
+}
+
+.add-person-section label:has(input[type="checkbox"]) {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 5px 0;
+  color: #444;
+  cursor: pointer;
+}
+
+.add-person-section input[type="checkbox"] {
+  width: 15px;
+  height: 15px;
+  margin: 0;
+  cursor: pointer;
+}
+
+.add-person-section button {
+  margin-top: 4px;
+  margin-right: 5px;
+  padding: 6px 10px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  background: white;
+  color: #333;
+  cursor: pointer;
+  font-size: 13px;
+}
+
+.add-person-section button:hover {
+  background: #f0f0f0;
+}
+
+.add-person-section button:first-of-type {
+  background: #333;
+  border-color: #333;
+  color: white;
+}
+
+.add-person-section button:first-of-type:hover {
+  background: #222;
+}
+
+.form-actions {
+  display: flex;
+  gap: 6px;
+  margin-top: 6px;
+}
+
+.form-actions button {
+  margin: 0;
+}
+
+.search {
+  margin-bottom: 12px;
+}
+
+.search input {
+  box-sizing: border-box;
+  width: 300px;
+  padding: 7px 10px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  background: white;
+  font-size: 13px;
+  outline: none;
+}
+
+.search input:focus {
+  border-color: #999;
+  box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.06);
+}
+
+.search-results {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-top: 8px;
+  width: 300px;
+  padding: 4px;
+  box-sizing: border-box;
+  border: 1px solid #ddd;
+  border-radius: 7px;
+  background: white;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+}
+
+.search-results button {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 7px 9px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  background: white;
+  cursor: pointer;
+  text-align: left;
+}
+
+.search-results button:hover {
+  background: #f5f5f5;
+  border-color: #ccc;
+}
+
+.search-result-name {
+  font-size: 14px;
+  font-weight: 600;
+  color: #333;
+}
+
+.search-result-meta {
+  margin-top: 3px;
+  font-size: 12px;
+  color: #777;
+  text-transform: capitalize;
+}
+
+.no-search-results {
+  padding: 10px 12px;
+  font-size: 13px;
+  color: #777;
+  text-align: center;
+}
+
+.edit-section {
+  margin-top: 12px;
+  padding: 12px;
+  border: 1px solid #eee;
+  border-radius: 8px;
+  background: #fafafa;
+}
+
+.edit-section h3 {
+  margin-top: 0;
+  margin-bottom: 12px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #555;
+}
+
+.edit-section input {
+  display: block;
+  box-sizing: border-box;
+  width: 100%;
+  margin: 6px 0 12px;
+  padding: 7px 9px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  background: white;
+  font-size: 13px;
+}
+
+.edit-section label {
+  display: block;
+  font-size: 14px;
+  color: #555;
+}
+
+.edit-section button {
+  margin-right: 6px;
+  padding: 8px 14px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  background: white;
+  color: #333;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.edit-section button:hover {
+  background: #f0f0f0;
+}
+
+.edit-section button:first-of-type {
+  background: #333;
+  border-color: #333;
+  color: white;
+}
+
+.edit-section button:first-of-type:hover {
+  background: #222;
+}
+
+.tree-actions {
+  margin-top: 16px;
+  padding-top: 12px;
+  border-top: 1px solid #eee;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.tree-actions button {
+  width: 100%;
+  padding: 6px 9px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  background: white;
+  color: #333;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 500;
+  text-align: left;
+}
+
+.tree-actions button:hover {
+  background: #f5f5f5;
+}
+
+.tree-actions button:last-child {
+  background: #333;
+  border-color: #333;
+  color: white;
+}
+
+.tree-actions button:last-child:hover {
+  background: #222;
+}
