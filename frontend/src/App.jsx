@@ -301,6 +301,7 @@ function App() {
               <h2>{selectedPerson.name}</h2>
               <p>{selectedPerson.age} years old - {selectedPerson.gender}</p>
             </div>
+            
             <div className="person-actions">
               <button
                 className="primary-action-button"
