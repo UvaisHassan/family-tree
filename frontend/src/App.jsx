@@ -245,7 +245,7 @@ function App() {
         </div>
       )}
 
-      <h2>
+      <h2 id='family-tree-heading'>
         Family tree of {rootPerson?.name}
       </h2>
 
@@ -571,24 +571,35 @@ function App() {
                 Add Child
               </button>
             </div>
+
             <div className="tree-actions">
               <button
                 onClick={() => {
-                  const element = document.getElementById(
-                    `person-${selectedPerson.id}`
-                  )
-                  element?.scrollIntoView({
+                  const target =
+                    window.innerWidth <= 768
+                      ? document.getElementById("mobile-family-tree")
+                      : document.getElementById(`person-${selectedPerson.id}`)
+
+                  target?.scrollIntoView({
                     behavior: "smooth",
-                    block: "center",
+                    block: "start",
                     inline: "center",
                   })
                 }}
               >
                 Show in tree
               </button>
+
               <button
                 onClick={() => {
                   setFocusedPersonId(selectedPerson.id)
+
+                  setTimeout(() => {
+                    document.getElementById("family-tree-heading")?.scrollIntoView({
+                      behavior: "smooth",
+                      block: "start",
+                    })
+                  }, 0)
                 }}
               >
                 View this person's tree

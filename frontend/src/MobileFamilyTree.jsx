@@ -99,7 +99,7 @@ function MobileFamilyTree({
   }
 
   return (
-    <div className="mobile-family-tree">
+    <div className="mobile-family-tree" id="mobile-family-tree">
       <MobileFamilyNode
         person={rootPerson}
         family={family}
