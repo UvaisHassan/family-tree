@@ -3,6 +3,8 @@ const mongoose = require("mongoose")
 const cors = require("cors")
 require("dotenv").config()
 
+const editingEnabled = process.env.EDITING_ENABLED === "true"
+
 const Person = require("./models/Person")
 
 const app = express()
@@ -32,6 +34,12 @@ app.get("/api/people", async (req, res) => {
 })
 
 app.post("/api/people", async (req, res) => {
+  if (!editingEnabled) {
+    return res.status(403).json({
+      message: "Editing is currently disabled.",
+    })
+  }
+
   try {
     const person = await Person.create(req.body)
     res.status(201).json(person)
@@ -42,6 +50,12 @@ app.post("/api/people", async (req, res) => {
 })
 
 app.delete("/api/people/:id", async (req, res) => {
+  if (!editingEnabled) {
+    return res.status(403).json({
+      message: "Editing is currently disabled.",
+    })
+  }
+
   try {
     const personId = Number(req.params.id)
 
@@ -73,6 +87,12 @@ app.delete("/api/people/:id", async (req, res) => {
 })
 
 app.put("/api/people/:id", async (req, res) => {
+  if (!editingEnabled) {
+    return res.status(403).json({
+      message: "Editing is currently disabled.",
+    })
+  }
+
   try {
     const person = await Person.findOneAndUpdate(
       { id: Number(req.params.id) },
@@ -96,6 +116,12 @@ app.put("/api/people/:id", async (req, res) => {
 })
 
 app.put("/api/people/:id/spouse", async (req, res) => {
+  if (!editingEnabled) {
+    return res.status(403).json({
+      message: "Editing is currently disabled.",
+    })
+  }
+
   try {
     const personId = Number(req.params.id)
     const spouseId =
