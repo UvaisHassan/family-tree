@@ -674,9 +674,75 @@ h1 {
   .person-details {
     position: static;
     width: 100%;
-    /* box-sizing: border-box;
-    height: auto;
-    max-height: none; */
     margin-top: 16px;
+  }
+
+  .parent-search {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 10px 12px;
+    margin-bottom: 10px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    font-size: 14px;
+  }
+
+  .parent-result {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 12px;
+    margin-bottom: 6px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    background: white;
+    cursor: pointer;
+  }
+
+  .parent-result:hover {
+    background: #f5f5f5;
+  }
+
+  .parent-result-info {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  .parent-result-info div {
+    font-size: 12px;
+    color: #777;
+  }
+
+  .selected-parent {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px 10px;
+    margin-bottom: 6px;
+    border-radius: 8px;
+    background: #f1f1f1;
+  }
+
+  .selected-parent button {
+    border: 0;
+    background: none;
+    color: #666;
+    cursor: pointer;
+  }
+
+  .edit-parents-button {
+    padding: 7px 12px;
+    margin-right: 6px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    background: white;
+    color: #333;
+    font-size: 13px;
+    cursor: pointer;
+  }
+
+  .edit-parents-button:hover {
+    background: #f5f5f5;
   }
 }

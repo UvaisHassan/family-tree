@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 
 import Person from './Person'
 import MobileFamilyTree from './MobileFamilyTree'
+import ParentSelector from './ParentSelector'
 
 function App() {
   const [treeZoom, setTreeZoom] = useState(1)
@@ -36,7 +37,19 @@ function App() {
 
   const [searchTerm, setSearchTerm] = useState("")
 
+  const [parentSearch, setParentSearch] = useState("")
+  const [addParentSearch, setAddParentSearch] = useState("")
+
   const [family, setFamily] = useState([])
+
+  const matchingParents = selectedPerson
+    ? family.filter(
+        (person) =>
+          person.id !== selectedPerson.id &&
+          !editParentIds.includes(person.id) &&
+          person.name.toLowerCase().includes(parentSearch.toLowerCase())
+      )
+    : []
 
   useEffect(() => {
     fetch(`${import.meta.env.VITE_API_URL}/api/people`)
@@ -130,25 +143,131 @@ function App() {
 
           <h4>Parents</h4>
 
-          {family.map((person) => (
-            <label key={person.id}>
-              <input
-                type="checkbox"
-                checked={newParentIds.includes(person.id)}
-                onChange={(event) => {
-                  if (event.target.checked) {
-                    setNewParentIds([...newParentIds, person.id])
-                  } else {
-                    setNewParentIds(
-                      newParentIds.filter((id) => id !== person.id)
-                    )
-                  }
-                }}
-              />
+          <input
+            className="parent-search"
+            type="text"
+            placeholder="Search for a family member..."
+            value={addParentSearch}
+            onChange={(event) => setAddParentSearch(event.target.value)}
+          />
 
-              {person.name}
-            </label>
-          ))}
+          {addParentSearch.trim() && (
+            <>
+              {family.filter(
+                (person) =>
+                  !newParentIds.includes(person.id) &&
+                  person.name
+                    .toLowerCase()
+                    .includes(addParentSearch.toLowerCase())
+              ).length === 0 ? (
+                <p>No family members found.</p>
+              ) : (
+                family
+                  .filter((person) =>
+                    !newParentIds.includes(person.id) &&
+                    person.name
+                      .toLowerCase()
+                      .includes(addParentSearch.toLowerCase())
+                  )
+                  .slice(0, 8)
+                  .map((person) => (
+                    <label
+                      key={person.id}
+                      className="parent-result"
+                      onClick={(event) => {
+                        event.preventDefault()
+
+                        if (newParentIds.includes(person.id)) {
+                          setNewParentIds(
+                            newParentIds.filter((id) => id !== person.id)
+                          )
+                        } else {
+                          if (newParentIds.length >= 2) {
+                            return
+                          }
+
+                          setNewParentIds([
+                            ...newParentIds,
+                            person.id,
+                          ])
+                        }
+                      }}
+                    >
+                      <input
+                        type="checkbox"
+                        checked={newParentIds.includes(person.id)}
+                        readOnly
+                      />
+
+                      <div className="parent-result-info">
+                        <strong>{person.name}</strong>
+                        <div>
+                          {person.age} years old · {person.gender}
+                        </div>
+                        {person.spouseId && (
+                          <div>
+                            Spouse: {
+                              family.find(
+                                (member) => member.id === person.spouseId
+                              )?.name || "Unknown"
+                            }
+                          </div>
+                        )}
+                      </div>
+                    </label>
+                  ))
+              )}
+            </>
+          )}
+
+          <h4>Selected parents</h4>
+
+          {newParentIds.length > 0 ? (
+            newParentIds.map((parentId) => {
+              const parent = family.find(
+                (person) => person.id === parentId
+              )
+
+              if (!parent) {
+                return null
+              }
+
+              return (
+                <div className="selected-parent" key={parent.id}>
+                  <div className="parent-result-info">
+                    <strong>{parent.name}</strong>
+                    <div>
+                      {parent.age} years old · {parent.gender}
+                    </div>
+                    {parent.spouseId && (
+                      <div>
+                        Spouse: {
+                          family.find(
+                            (person) => person.id === parent.spouseId
+                          )?.name || "Unknown"
+                        }
+                      </div>
+                    )}
+                  </div>
+
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setNewParentIds(
+                        newParentIds.filter(
+                          (id) => id !== parent.id
+                        )
+                      )
+                    }}
+                  >
+                    Remove
+                  </button>
+                </div>
+              )
+            })
+          ) : (
+            <p>No parents selected</p>
+          )}
 
           <div className="form-actions">
             <button
@@ -201,7 +320,12 @@ function App() {
             >
               Save
             </button>
-            <button onClick={() => setIsAdding(false)}>
+            <button
+              onClick={() => {
+                setIsAdding(false)
+                setAddParentSearch("")
+              }}
+            >
               Cancel
             </button>
           </div>
@@ -466,6 +590,7 @@ function App() {
                 className="action-button"
                 onClick={() => {
                   setEditParentIds(selectedPerson.parentIds)
+                  setParentSearch("")
                   setIsEditingParents(true)
                 }}
               >
@@ -476,85 +601,180 @@ function App() {
             {isEditingParents && (
               <div>
                 <h3>Edit Parents</h3>
-                
-                {family
-                  .filter((person) => person.id !== selectedPerson.id)
-                  .map((person) => (
-                    <label key={person.id}>
-                      <input
-                        type='checkbox'
-                        checked={editParentIds.includes(person.id)}
-                        onChange={(event) => {
-                          if (event.target.checked) {
-                            if (editParentIds.length >= 2) {
-                              return
-                            }
-                            setEditParentIds([
-                              ...editParentIds,
-                              person.id,
-                            ])
-                          } else {
+
+                <h4>Selected parents</h4>
+
+                {editParentIds.length > 0 ? (
+                  editParentIds.map((parentId) => {
+                    const parent = family.find(
+                      (person) => person.id === parentId
+                    )
+
+                    if (!parent) {
+                      return null
+                    }
+
+                    return (
+                      <div className='selected-parent' key={parent.id}>
+                        <div className="parent-result-info">
+                          <strong>{parent.name}</strong>
+                          <div>
+                            {parent.age} years old - {parent.gender}
+                          </div>
+                          {parent.spouseId && (
+                            <div>
+                              Spouse: {
+                                family.find(
+                                  (person) => person.id === parent.spouseId
+                                )?.name || "Unknown"
+                              }
+                            </div>
+                          )}
+                        </div>
+                        
+                        <button
+                          type="button"
+                          onClick={() => {
                             setEditParentIds(
                               editParentIds.filter(
-                                (id) => id !== person.id
+                                (id) => id !== parent.id
                               )
                             )
-                          }
-                        }}
-                      />
-                      {person.name}
-                    </label>
-                  ))}
+                          }}
+                        >
+                          Remove
+                        </button>
+                      </div>
+                    )
+                  })
+                ) : (
+                  <p>No parents selected</p>
+                )}
 
-                  <button
-                    onClick={async () => {
-                      try {
-                        const response = await fetch(
-                          `${import.meta.env.VITE_API_URL}/api/people/${selectedPerson.id}`,
-                          {
-                            method: "PUT",
-                            headers: {
-                              "Content-Type": "application/json",
-                            },
-                            body: JSON.stringify({
-                              name: selectedPerson.name,
-                              age: selectedPerson.age,
-                              parentIds: editParentIds,
-                            }),
-                          }
-                        )
+                <input
+                  className='parent-search'
+                  type="text"
+                  placeholder='Search for a family member...'
+                  value={parentSearch}
+                  onChange={(event) => setParentSearch(event.target.value)}
+                />
+                
+                {parentSearch.trim() && (
+                  <>
+                    {family.filter(
+                      (person) =>
+                        person.id !== selectedPerson.id &&
+                        !editParentIds.includes(person.id) &&
+                        person.name.toLowerCase().includes(parentSearch.toLowerCase())
+                    ).length === 0 ? (
+                      <p>No family members found.</p>
+                    ) : (
+                      matchingParents
+                        .slice(0, 8)
+                        .map((person) => (
+                          <label
+                          key={person.id}
+                          className='parent-result'
+                          onClick={(event) => {
+                            event.preventDefault()
+                            
+                            if (editParentIds.includes(person.id)) {
+                              setEditParentIds(
+                                  editParentIds.filter((id) => id !== person.id)
+                                )
+                              } else {
+                                if (editParentIds.length >= 2) {
+                                  return
+                                }
+                                
+                                setEditParentIds([
+                                  ...editParentIds,
+                                  person.id,
+                                ])
+                              }
+                            }}
+                            >
+                            <input
+                              type='checkbox'
+                              checked={editParentIds.includes(person.id)}
+                              readOnly
+                            />
+                            <div className='parent-result-info'>
+                              <strong>{person.name}</strong>
+                              <div>
+                                {person.age} years old - {person.gender}
+                              </div>
+                              {person.spouseId && (
+                                <div>
+                                  Spouse: {
+                                    family.find(
+                                      (member) => member.id === person.spouseId
+                                    )?.name || "Unknown"
+                                  }
+                                </div>
+                              )}
+                            </div>
+                          </label>
+                        ))
+                    )}
 
-                        if (!response.ok) {
-                          throw new Error("Failed to update parents")
+                    {matchingParents.length > 8 && (
+                      <p>Showing first 8 results of {matchingParents.length}. Refine your search to see more.</p>
+                    )}
+                  </>
+                )}
+
+                <button
+                  className='edit-parents-button'
+                  onClick={async () => {
+                    try {
+                      const response = await fetch(
+                        `${import.meta.env.VITE_API_URL}/api/people/${selectedPerson.id}`,
+                        {
+                          method: "PUT",
+                          headers: {
+                            "Content-Type": "application/json",
+                          },
+                          body: JSON.stringify({
+                            name: selectedPerson.name,
+                            age: selectedPerson.age,
+                            parentIds: editParentIds,
+                          }),
                         }
+                      )
 
-                        const updatedPerson = await response.json()
-                        
-                        const updatedFamily = family.map((person) =>
-                          person.id === updatedPerson.id
-                            ? updatedPerson
-                            : person
-                        )
-                    
-                        setFamily(updatedFamily)
-                        setSelectedPerson(updatedPerson)
-                        setIsEditingParents(false)
-                      } catch (error) {
-                        console.error("Failed to update parents:", error)
-                        alert("Failed to update parents.")
+                      if (!response.ok) {
+                        throw new Error("Failed to update parents")
                       }
 
-                    }}
-                  >
-                    Save
-                  </button>
-                  <button
-                    onClick={() => {
+                      const updatedPerson = await response.json()
+                      
+                      const updatedFamily = family.map((person) =>
+                        person.id === updatedPerson.id
+                          ? updatedPerson
+                          : person
+                      )
+                  
+                      setFamily(updatedFamily)
+                      setSelectedPerson(updatedPerson)
                       setIsEditingParents(false)
-                    }}
-                  >
-                    Cancel
-                  </button>
+                    } catch (error) {
+                      console.error("Failed to update parents:", error)
+                      alert("Failed to update parents.")
+                    }
+
+                  }}
+                >
+                  Save
+                </button>
+                <button
+                  className='edit-parents-button'
+                  onClick={() => {
+                    setIsEditingParents(false)
+                  }}
+                >
+                  Cancel
+                </button>
               </div>
             )}
             <div className="relationship-section">
