@@ -1,12 +1,25 @@
-import { useState } from 'react'
-import Person from './Person'
+import { useEffect, useState } from 'react'
 
-import familyData from './familyData'
+import Person from './Person'
+import MobileFamilyTree from './MobileFamilyTree'
 
 function App() {
   const [treeZoom, setTreeZoom] = useState(1)
 
   const [selectedPerson, setSelectedPerson] = useState(null)
+
+  const handleSelectPerson = (person) => {
+    setSelectedPerson(person)
+
+    if (window.innerWidth <= 768) {
+      setTimeout(() => {
+        document.querySelector(".person-details")?.scrollIntoView({
+          behavior: "smooth",
+          block: "start",
+        })
+      }, 0)
+    }
+  }
 
   const [isEditing, setIsEditing] = useState(false)
   const [editName, setEditName] = useState("")
@@ -23,7 +36,18 @@ function App() {
 
   const [searchTerm, setSearchTerm] = useState("")
 
-  const [family, setFamily] = useState(familyData)
+  const [family, setFamily] = useState([])
+
+  useEffect(() => {
+    fetch(`${import.meta.env.VITE_API_URL}/api/people`)
+      .then((response) => response.json())
+      .then((data) => {
+        setFamily(data)
+      })
+      .catch((error) => {
+        console.error("Failed to fetch family:", error)
+      })
+  }, [])
 
   const [focusedPersonId, setFocusedPersonId] = useState(1)
 
@@ -128,15 +152,17 @@ function App() {
 
           <div className="form-actions">
             <button
-              onClick={() => {
+              onClick={async () => {
                 if (!newName.trim()) {
                   alert("Please enter a name.")
                   return
                 }
+
                 if (!newAge || Number(newAge) < 0) {
                   alert("Please enter a valid age.")
                   return
                 }
+
                 const newPerson = {
                   id: Date.now(),
                   name: newName,
@@ -145,12 +171,32 @@ function App() {
                   parentIds: newParentIds,
                   spouseId: null,
                 }
-                setFamily([...family, newPerson])
-                setNewName("")
-                setNewAge("")
-                setNewGender("female")
-                setNewParentIds([])
-                setIsAdding(false)
+
+                try {
+                  const response = await fetch(`${import.meta.env.VITE_API_URL}/api/people`, {
+                    method: "POST",
+                    headers: {
+                      "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify(newPerson),
+                  })
+
+                  if (!response.ok) {
+                    throw new Error("Failed to create person")
+                  }
+
+                  const savedPerson = await response.json()
+
+                  setFamily([...family, newPerson])
+                  setNewName("")
+                  setNewAge("")
+                  setNewGender("female")
+                  setNewParentIds([])
+                  setIsAdding(false)
+                } catch (error) {
+                  console.error("Failed to save person:", error)
+                  alert("Failed to save family member.")
+                }
               }}
             >
               Save
@@ -227,19 +273,36 @@ function App() {
       </div>
       
       <div className="main-layout">
+        {focusedPersonId !== 1 && (
+          <button
+            onClick={() => setFocusedPersonId(1)}
+          >
+            Back to main tree
+          </button>
+        )}
+
         <div className='tree'>
           <div
             className="tree-content"
             style={{ transform: `scale(${treeZoom})` }}
           >
-            <Person
-              person={rootPerson}
-              family={family}
-              onSelect={setSelectedPerson}
-              selectedPerson={selectedPerson}
-            />
+            {rootPerson && (
+              <Person
+                person={rootPerson}
+                family={family}
+                onSelect={handleSelectPerson}
+                selectedPerson={selectedPerson}
+              />
+            )}
           </div>
         </div>
+
+        <MobileFamilyTree
+          family={family}
+          onSelect={handleSelectPerson}
+          selectedPerson={selectedPerson}
+          focusedPersonId={focusedPersonId}
+        />
 
         {selectedPerson && (
           <div className='person-details'>
@@ -259,6 +322,7 @@ function App() {
                 Edit
               </button>
             </div>
+
             {isEditing && (
               <div className='edit-section'>
                 <h3>Editing {selectedPerson.name}</h3>
@@ -278,31 +342,51 @@ function App() {
 
                 <div className="form-actions">
                   <button
-                    onClick={() => {
+                    onClick={async () => {
                       if (!editName.trim()) {
                         alert("Please enter a name.")
                         return
                       }
+
                       if (!editAge || Number(editAge) < 0) {
                         alert("Please enter a valid age.")
                         return
                       }
-                      const updatedFamily = family.map((person) =>
-                        person.id === selectedPerson.id
-                          ? {
-                              ...person,
+
+                      try {
+                        const response = await fetch(
+                          `${import.meta.env.VITE_API_URL}/api/people/${selectedPerson.id}`,
+                          {
+                            method: "PUT",
+                            headers: {
+                              "Content-Type": "application/json",
+                            },
+                            body: JSON.stringify({
                               name: editName,
                               age: Number(editAge),
-                            }
-                          : person
-                      )
-                      setFamily(updatedFamily)
-                      setSelectedPerson(
-                        updatedFamily.find(
-                          (person) => person.id === selectedPerson.id
+                            }),
+                          }
                         )
-                      )
-                      setIsEditing(false)
+
+                        if (!response.ok) {
+                          throw new Error("Failed to update person")
+                        }
+
+                        const updatedPerson = await response.json()
+
+                        const updatedFamily = family.map((person) =>
+                          person.id === updatedPerson.id
+                            ? updatedPerson
+                            : person
+                        )
+  
+                        setFamily(updatedFamily)
+                        setSelectedPerson(updatedPerson)
+                        setIsEditing(false)
+                      } catch (error) {
+                        console.error("Failed to update person:", error)
+                        alert("Failed to update family member.")
+                      }
                     }}
                   >
                     Save
@@ -313,35 +397,57 @@ function App() {
                 </div>
               </div>
             )}
+
             <button
               className='delete-button'
-              onClick={() => {
+              onClick={async () => {
                 const confirmed = window.confirm(
                   `Delete ${selectedPerson.name}?`
                 )
+
                 if (!confirmed) {
                   return
                 }
-                const updatedFamily = family
-                  .filter((person) => person.id !== selectedPerson.id)
-                  .map((person) => ({
-                    ...person,
-                    parentIds: person.parentIds.filter(
-                      (id) => id !== selectedPerson.id
-                    ),
-                    spouseId:
-                      person.spouseId === selectedPerson.id
-                        ? null
-                        : person.spouseId,
-                  }))
-                setFamily(updatedFamily)
-                setSelectedPerson(null)
+
+                try {
+                  const response = await fetch(
+                    `${import.meta.env.VITE_API_URL}/api/people/${selectedPerson.id}`,
+                    {
+                      method: "DELETE",
+                    }
+                  )
+
+                  if (!response.ok) {
+                    throw new Error("Failed to delete person")
+                  }
+                  
+                  const updatedFamily = family
+                    .filter((person) => person.id !== selectedPerson.id)
+                    .map((person) => ({
+                      ...person,
+                      parentIds: person.parentIds.filter(
+                        (id) => id !== selectedPerson.id
+                      ),
+                      spouseId:
+                        person.spouseId === selectedPerson.id
+                          ? null
+                          : person.spouseId,
+                    }))
+                  
+                  setFamily(updatedFamily)
+                  setSelectedPerson(null)
+                } catch (error) {
+                  console.error("Failed to delete person:", error)
+                  alert("Failed to delete family member.")
+                }
               }}
             >
               Delete
             </button>
+
             <div className="relationship-section">
               <h3>Parents</h3>
+              
               {selectedParents.length > 0 ? (
                 selectedParents.map((parent) => (
                   <button
@@ -355,6 +461,7 @@ function App() {
               ) : (
                 <p>Unknown</p>
               )}
+
               <button
                 className="action-button"
                 onClick={() => {
@@ -365,9 +472,11 @@ function App() {
                 Edit Parents
               </button>
             </div>
+            
             {isEditingParents && (
               <div>
                 <h3>Edit Parents</h3>
+                
                 {family
                   .filter((person) => person.id !== selectedPerson.id)
                   .map((person) => (
@@ -396,23 +505,45 @@ function App() {
                       {person.name}
                     </label>
                   ))}
+
                   <button
-                    onClick={() => {
-                      const updatedFamily = family.map((person) =>
-                        person.id === selectedPerson.id
-                          ? {
-                              ...person,
+                    onClick={async () => {
+                      try {
+                        const response = await fetch(
+                          `${import.meta.env.VITE_API_URL}/api/people/${selectedPerson.id}`,
+                          {
+                            method: "PUT",
+                            headers: {
+                              "Content-Type": "application/json",
+                            },
+                            body: JSON.stringify({
+                              name: selectedPerson.name,
+                              age: selectedPerson.age,
                               parentIds: editParentIds,
-                            }
-                          : person
-                      )
-                      setFamily(updatedFamily)
-                      setSelectedPerson(
-                        updatedFamily.find(
-                          (person) => person.id === selectedPerson.id
+                            }),
+                          }
                         )
-                      )
-                      setIsEditingParents(false)
+
+                        if (!response.ok) {
+                          throw new Error("Failed to update parents")
+                        }
+
+                        const updatedPerson = await response.json()
+                        
+                        const updatedFamily = family.map((person) =>
+                          person.id === updatedPerson.id
+                            ? updatedPerson
+                            : person
+                        )
+                    
+                        setFamily(updatedFamily)
+                        setSelectedPerson(updatedPerson)
+                        setIsEditingParents(false)
+                      } catch (error) {
+                        console.error("Failed to update parents:", error)
+                        alert("Failed to update parents.")
+                      }
+
                     }}
                   >
                     Save
