@@ -101,7 +101,7 @@ function App() {
       </button>
 
       {isAdding && (
-        <div className='add-person-section'>
+        <div className='add-person-section' id='add-person-section'>
           <h3>Add a family member</h3>
 
           <input
@@ -528,6 +528,7 @@ function App() {
                 </button>
               </div>
             )}
+
             <div className="relationship-section">
               <h3>Spouse</h3>
               {selectedSpouse ? (
@@ -541,6 +542,7 @@ function App() {
                 <p>None</p>
               )}
             </div>
+
             <div className="relationship-section">
               <h3>Children</h3>
               {selectedChildren.length > 0 ? (
@@ -567,6 +569,13 @@ function App() {
                   setNewAge("")
                   setNewParentIds(parentIds)
                   setIsAdding(true)
+
+                  setTimeout(() => {
+                    document.getElementById("add-person-section")?.scrollIntoView({
+                      behavior: "smooth",
+                      block: "start",
+                    })
+                  }, 0)
                 }}
               >
                 Add Child
