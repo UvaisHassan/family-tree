@@ -37,19 +37,7 @@ function App() {
 
   const [searchTerm, setSearchTerm] = useState("")
 
-  const [parentSearch, setParentSearch] = useState("")
-  const [addParentSearch, setAddParentSearch] = useState("")
-
   const [family, setFamily] = useState([])
-
-  const matchingParents = selectedPerson
-    ? family.filter(
-        (person) =>
-          person.id !== selectedPerson.id &&
-          !editParentIds.includes(person.id) &&
-          person.name.toLowerCase().includes(parentSearch.toLowerCase())
-      )
-    : []
 
   useEffect(() => {
     fetch(`${import.meta.env.VITE_API_URL}/api/people`)
@@ -141,133 +129,13 @@ function App() {
             </select>
           </label>
 
-          <h4>Parents</h4>
+          <h3>Parents</h3>
 
-          <input
-            className="parent-search"
-            type="text"
-            placeholder="Search for a family member..."
-            value={addParentSearch}
-            onChange={(event) => setAddParentSearch(event.target.value)}
+          <ParentSelector
+            family={family}
+            selectedParentIds={newParentIds}
+            onChange={setNewParentIds}
           />
-
-          {addParentSearch.trim() && (
-            <>
-              {family.filter(
-                (person) =>
-                  !newParentIds.includes(person.id) &&
-                  person.name
-                    .toLowerCase()
-                    .includes(addParentSearch.toLowerCase())
-              ).length === 0 ? (
-                <p>No family members found.</p>
-              ) : (
-                family
-                  .filter((person) =>
-                    !newParentIds.includes(person.id) &&
-                    person.name
-                      .toLowerCase()
-                      .includes(addParentSearch.toLowerCase())
-                  )
-                  .slice(0, 8)
-                  .map((person) => (
-                    <label
-                      key={person.id}
-                      className="parent-result"
-                      onClick={(event) => {
-                        event.preventDefault()
-
-                        if (newParentIds.includes(person.id)) {
-                          setNewParentIds(
-                            newParentIds.filter((id) => id !== person.id)
-                          )
-                        } else {
-                          if (newParentIds.length >= 2) {
-                            return
-                          }
-
-                          setNewParentIds([
-                            ...newParentIds,
-                            person.id,
-                          ])
-                        }
-                      }}
-                    >
-                      <input
-                        type="checkbox"
-                        checked={newParentIds.includes(person.id)}
-                        readOnly
-                      />
-
-                      <div className="parent-result-info">
-                        <strong>{person.name}</strong>
-                        <div>
-                          {person.age} years old · {person.gender}
-                        </div>
-                        {person.spouseId && (
-                          <div>
-                            Spouse: {
-                              family.find(
-                                (member) => member.id === person.spouseId
-                              )?.name || "Unknown"
-                            }
-                          </div>
-                        )}
-                      </div>
-                    </label>
-                  ))
-              )}
-            </>
-          )}
-
-          <h4>Selected parents</h4>
-
-          {newParentIds.length > 0 ? (
-            newParentIds.map((parentId) => {
-              const parent = family.find(
-                (person) => person.id === parentId
-              )
-
-              if (!parent) {
-                return null
-              }
-
-              return (
-                <div className="selected-parent" key={parent.id}>
-                  <div className="parent-result-info">
-                    <strong>{parent.name}</strong>
-                    <div>
-                      {parent.age} years old · {parent.gender}
-                    </div>
-                    {parent.spouseId && (
-                      <div>
-                        Spouse: {
-                          family.find(
-                            (person) => person.id === parent.spouseId
-                          )?.name || "Unknown"
-                        }
-                      </div>
-                    )}
-                  </div>
-
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setNewParentIds(
-                        newParentIds.filter(
-                          (id) => id !== parent.id
-                        )
-                      )
-                    }}
-                  >
-                    Remove
-                  </button>
-                </div>
-              )
-            })
-          ) : (
-            <p>No parents selected</p>
-          )}
 
           <div className="form-actions">
             <button
@@ -323,7 +191,6 @@ function App() {
             <button
               onClick={() => {
                 setIsAdding(false)
-                setAddParentSearch("")
               }}
             >
               Cancel
@@ -590,7 +457,6 @@ function App() {
                 className="action-button"
                 onClick={() => {
                   setEditParentIds(selectedPerson.parentIds)
-                  setParentSearch("")
                   setIsEditingParents(true)
                 }}
               >
@@ -602,127 +468,11 @@ function App() {
               <div>
                 <h3>Edit Parents</h3>
 
-                <h4>Selected parents</h4>
-
-                {editParentIds.length > 0 ? (
-                  editParentIds.map((parentId) => {
-                    const parent = family.find(
-                      (person) => person.id === parentId
-                    )
-
-                    if (!parent) {
-                      return null
-                    }
-
-                    return (
-                      <div className='selected-parent' key={parent.id}>
-                        <div className="parent-result-info">
-                          <strong>{parent.name}</strong>
-                          <div>
-                            {parent.age} years old - {parent.gender}
-                          </div>
-                          {parent.spouseId && (
-                            <div>
-                              Spouse: {
-                                family.find(
-                                  (person) => person.id === parent.spouseId
-                                )?.name || "Unknown"
-                              }
-                            </div>
-                          )}
-                        </div>
-                        
-                        <button
-                          type="button"
-                          onClick={() => {
-                            setEditParentIds(
-                              editParentIds.filter(
-                                (id) => id !== parent.id
-                              )
-                            )
-                          }}
-                        >
-                          Remove
-                        </button>
-                      </div>
-                    )
-                  })
-                ) : (
-                  <p>No parents selected</p>
-                )}
-
-                <input
-                  className='parent-search'
-                  type="text"
-                  placeholder='Search for a family member...'
-                  value={parentSearch}
-                  onChange={(event) => setParentSearch(event.target.value)}
+                <ParentSelector
+                  family={family}
+                  selectedParentIds={editParentIds}
+                  onChange={setEditParentIds}
                 />
-                
-                {parentSearch.trim() && (
-                  <>
-                    {family.filter(
-                      (person) =>
-                        person.id !== selectedPerson.id &&
-                        !editParentIds.includes(person.id) &&
-                        person.name.toLowerCase().includes(parentSearch.toLowerCase())
-                    ).length === 0 ? (
-                      <p>No family members found.</p>
-                    ) : (
-                      matchingParents
-                        .slice(0, 8)
-                        .map((person) => (
-                          <label
-                          key={person.id}
-                          className='parent-result'
-                          onClick={(event) => {
-                            event.preventDefault()
-                            
-                            if (editParentIds.includes(person.id)) {
-                              setEditParentIds(
-                                  editParentIds.filter((id) => id !== person.id)
-                                )
-                              } else {
-                                if (editParentIds.length >= 2) {
-                                  return
-                                }
-                                
-                                setEditParentIds([
-                                  ...editParentIds,
-                                  person.id,
-                                ])
-                              }
-                            }}
-                            >
-                            <input
-                              type='checkbox'
-                              checked={editParentIds.includes(person.id)}
-                              readOnly
-                            />
-                            <div className='parent-result-info'>
-                              <strong>{person.name}</strong>
-                              <div>
-                                {person.age} years old - {person.gender}
-                              </div>
-                              {person.spouseId && (
-                                <div>
-                                  Spouse: {
-                                    family.find(
-                                      (member) => member.id === person.spouseId
-                                    )?.name || "Unknown"
-                                  }
-                                </div>
-                              )}
-                            </div>
-                          </label>
-                        ))
-                    )}
-
-                    {matchingParents.length > 8 && (
-                      <p>Showing first 8 results of {matchingParents.length}. Refine your search to see more.</p>
-                    )}
-                  </>
-                )}
 
                 <button
                   className='edit-parents-button'
