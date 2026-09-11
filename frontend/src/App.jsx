@@ -52,15 +52,7 @@ function App() {
 
   const [focusedPersonId, setFocusedPersonId] = useState(1)
 
-  const rootPerson = family.find(
-    (person) => person.id === focusedPersonId
-  )
-
-  const focusedParents = rootPerson
-    ? family.filter((person) =>
-        rootPerson.parentIds.includes(person.id)
-      )
-    : []
+  const rootPerson = family.find((person) => person.id === focusedPersonId)
 
   const searchResults = family.filter((person) =>
     person.name.toLowerCase().includes(searchTerm.toLowerCase())
@@ -171,8 +163,6 @@ function App() {
                   if (!response.ok) {
                     throw new Error("Failed to create person")
                   }
-
-                  const savedPerson = await response.json()
 
                   setFamily([...family, newPerson])
                   setNewName("")
