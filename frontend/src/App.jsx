@@ -40,6 +40,17 @@ function App() {
   const [family, setFamily] = useState([])
 
   useEffect(() => {
+    if (!selectedPerson || window.innerWidth > 768) return
+
+    const element = document.getElementById("person-details")
+
+    element?.scrollIntoView({
+      behavior: "smooth",
+      block: "center",
+    })
+  }, [selectedPerson])
+
+  useEffect(() => {
     fetch(`${import.meta.env.VITE_API_URL}/api/people`)
       .then((response) => response.json())
       .then((data) => {
@@ -205,13 +216,15 @@ function App() {
                   setSelectedPerson(person)
                   setSearchTerm("")
 
-                  const element = document.getElementById(`person-${person.id}`)
-
-                  element?.scrollIntoView({
+                  if (window.innerWidth > 768) {
+                    document
+                      .getElementById(`person-${person.id}`)
+                      ?.scrollIntoView({
                     behavior: "smooth",
                     block: "center",
                     inline: "center",
                   })
+                  }
                 }}
               >
                 <div className="search-result-name">{person.name}</div>
@@ -271,7 +284,7 @@ function App() {
         />
 
         {selectedPerson && (
-          <div className="person-details">
+          <div className="person-details" id="person-details">
             <div className="person-details-header">
               <h2>{selectedPerson.name}</h2>
               <p>
