@@ -9,26 +9,21 @@ function MobileFamilyNode({
 }) {
   const [expanded, setExpanded] = useState(depth === 0)
 
-  const spouse = family.find(
-    (member) => member.id === person.spouseId
-  )
+  const spouse = family.find((member) => member.id === person.spouseId)
 
-  const children = family.filter(
-    (member) => member.parentIds.includes(person.id)
+  const children = family.filter((member) =>
+    member.parentIds.includes(person.id),
   )
 
   const hasChildren = children.length > 0
 
   const isSelected =
-    selectedPerson?.id === person.id ||
-    selectedPerson?.id === spouse?.id
+    selectedPerson?.id === person.id || selectedPerson?.id === spouse?.id
 
   return (
     <div className="mobile-family-branch">
       <div
-        className={`mobile-family-node ${
-          isSelected ? "selected" : ""
-        }`}
+        className={`mobile-family-node ${isSelected ? "selected" : ""}`}
         style={{ paddingLeft: `${depth * 20}px` }}
         onClick={() => {
           if (hasChildren) {
@@ -60,10 +55,7 @@ function MobileFamilyNode({
         )}
 
         {hasChildren && (
-          <button
-            className="mobile-family-toggle"
-            type="button"
-          >
+          <button className="mobile-family-toggle" type="button">
             {expanded ? "▼" : "▶"}
           </button>
         )}
@@ -90,9 +82,7 @@ function MobileFamilyTree({
   selectedPerson,
   focusedPersonId,
 }) {
-  const rootPerson = family.find(
-    (person) => person.id === focusedPersonId
-  )
+  const rootPerson = family.find((person) => person.id === focusedPersonId)
 
   if (!rootPerson) {
     return null

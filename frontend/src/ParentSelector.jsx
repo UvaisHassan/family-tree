@@ -1,23 +1,17 @@
 import { useState } from "react"
 
-function ParentSelector({
-  family,
-  selectedParentIds,
-  onChange,
-}) {
+function ParentSelector({ family, selectedParentIds, onChange }) {
   const [search, setSearch] = useState("")
 
   const matchingParents = family.filter(
     (person) =>
       !selectedParentIds.includes(person.id) &&
-      person.name.toLowerCase().includes(search.toLowerCase())
+      person.name.toLowerCase().includes(search.toLowerCase()),
   )
 
   const addParent = (personId) => {
     if (selectedParentIds.includes(personId)) {
-      onChange(
-        selectedParentIds.filter((id) => id !== personId)
-      )
+      onChange(selectedParentIds.filter((id) => id !== personId))
       return
     }
 
@@ -25,16 +19,11 @@ function ParentSelector({
       return
     }
 
-    onChange([
-      ...selectedParentIds,
-      personId,
-    ])
+    onChange([...selectedParentIds, personId])
   }
 
   const removeParent = (personId) => {
-    onChange(
-      selectedParentIds.filter((id) => id !== personId)
-    )
+    onChange(selectedParentIds.filter((id) => id !== personId))
   }
 
   return (
@@ -43,9 +32,7 @@ function ParentSelector({
 
       {selectedParentIds.length > 0 ? (
         selectedParentIds.map((parentId) => {
-          const parent = family.find(
-            (person) => person.id === parentId
-          )
+          const parent = family.find((person) => person.id === parentId)
 
           if (!parent) {
             return null
@@ -61,20 +48,14 @@ function ParentSelector({
 
                 {parent.spouseId && (
                   <div>
-                    Spouse: {
-                      family.find(
-                        (person) =>
-                          person.id === parent.spouseId
-                      )?.name || "Unknown"
-                    }
+                    Spouse:{" "}
+                    {family.find((person) => person.id === parent.spouseId)
+                      ?.name || "Unknown"}
                   </div>
                 )}
               </div>
 
-              <button
-                type="button"
-                onClick={() => removeParent(parent.id)}
-              >
+              <button type="button" onClick={() => removeParent(parent.id)}>
                 Remove
               </button>
             </div>
@@ -97,47 +78,43 @@ function ParentSelector({
           {matchingParents.length === 0 ? (
             <p>No family members found.</p>
           ) : (
-            matchingParents
-              .slice(0, 8)
-              .map((person) => (
-                <label
-                  key={person.id}
-                  className="parent-result"
-                  onClick={(event) => {
-                    event.preventDefault()
-                    addParent(person.id)
-                  }}
-                >
-                  <input
-                    type="checkbox"
-                    checked={selectedParentIds.includes(person.id)}
-                    readOnly
-                  />
+            matchingParents.slice(0, 8).map((person) => (
+              <label
+                key={person.id}
+                className="parent-result"
+                onClick={(event) => {
+                  event.preventDefault()
+                  addParent(person.id)
+                }}
+              >
+                <input
+                  type="checkbox"
+                  checked={selectedParentIds.includes(person.id)}
+                  readOnly
+                />
 
-                  <div className="parent-result-info">
-                    <strong>{person.name}</strong>
-                    <div>
-                      {person.age} years old · {person.gender}
-                    </div>
-
-                    {person.spouseId && (
-                      <div>
-                        Spouse: {
-                          family.find(
-                            (member) =>
-                              member.id === person.spouseId
-                          )?.name || "Unknown"
-                        }
-                      </div>
-                    )}
+                <div className="parent-result-info">
+                  <strong>{person.name}</strong>
+                  <div>
+                    {person.age} years old · {person.gender}
                   </div>
-                </label>
-              ))
+
+                  {person.spouseId && (
+                    <div>
+                      Spouse:{" "}
+                      {family.find((member) => member.id === person.spouseId)
+                        ?.name || "Unknown"}
+                    </div>
+                  )}
+                </div>
+              </label>
+            ))
           )}
 
           {matchingParents.length > 8 && (
             <p>
-              Showing first 8 results of {matchingParents.length}. Refine your search to see more.
+              Showing first 8 results of {matchingParents.length}. Refine your
+              search to see more.
             </p>
           )}
         </>

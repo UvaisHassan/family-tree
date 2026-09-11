@@ -1,8 +1,8 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState } from "react"
 
-import Person from './Person'
-import MobileFamilyTree from './MobileFamilyTree'
-import ParentSelector from './ParentSelector'
+import Person from "./Person"
+import MobileFamilyTree from "./MobileFamilyTree"
+import ParentSelector from "./ParentSelector"
 
 function App() {
   const [treeZoom, setTreeZoom] = useState(1)
@@ -55,25 +55,19 @@ function App() {
   const rootPerson = family.find((person) => person.id === focusedPersonId)
 
   const searchResults = family.filter((person) =>
-    person.name.toLowerCase().includes(searchTerm.toLowerCase())
+    person.name.toLowerCase().includes(searchTerm.toLowerCase()),
   )
 
   const selectedChildren = selectedPerson
-    ? family.filter((person) =>
-        person.parentIds.includes(selectedPerson.id)
-      )
+    ? family.filter((person) => person.parentIds.includes(selectedPerson.id))
     : []
-  
+
   const selectedParents = selectedPerson
-    ? family.filter((person) =>
-        selectedPerson.parentIds.includes(person.id)
-      )
+    ? family.filter((person) => selectedPerson.parentIds.includes(person.id))
     : []
-  
+
   const selectedSpouse = selectedPerson
-    ? family.find(
-      (person) => person.id === selectedPerson.spouseId
-    )
+    ? family.find((person) => person.id === selectedPerson.spouseId)
     : null
 
   return (
@@ -93,7 +87,7 @@ function App() {
       </button>
 
       {isAdding && (
-        <div className='add-person-section' id='add-person-section'>
+        <div className="add-person-section" id="add-person-section">
           <h3>Add a family member</h3>
 
           <input
@@ -152,13 +146,16 @@ function App() {
                 }
 
                 try {
-                  const response = await fetch(`${import.meta.env.VITE_API_URL}/api/people`, {
-                    method: "POST",
-                    headers: {
-                      "Content-Type": "application/json",
+                  const response = await fetch(
+                    `${import.meta.env.VITE_API_URL}/api/people`,
+                    {
+                      method: "POST",
+                      headers: {
+                        "Content-Type": "application/json",
+                      },
+                      body: JSON.stringify(newPerson),
                     },
-                    body: JSON.stringify(newPerson),
-                  })
+                  )
 
                   if (!response.ok) {
                     throw new Error("Failed to create person")
@@ -192,7 +189,7 @@ function App() {
       <div className="search">
         <input
           type="text"
-          placeholder='Search for a person...'
+          placeholder="Search for a person..."
           value={searchTerm}
           onChange={(event) => setSearchTerm(event.target.value)}
         />
@@ -208,9 +205,7 @@ function App() {
                   setSelectedPerson(person)
                   setSearchTerm("")
 
-                  const element = document.getElementById(
-                    `person-${person.id}`
-                  )
+                  const element = document.getElementById(`person-${person.id}`)
 
                   element?.scrollIntoView({
                     behavior: "smooth",
@@ -219,25 +214,19 @@ function App() {
                   })
                 }}
               >
-                <div className='search-result-name'>
-                  {person.name}
-                </div>
-                <div className='search-result-meta'>
+                <div className="search-result-name">{person.name}</div>
+                <div className="search-result-meta">
                   {person.age} years old - {person.gender}
                 </div>
               </button>
             ))
           ) : (
-            <div className="no-search-results">
-              No family member found.
-            </div>
+            <div className="no-search-results">No family member found.</div>
           )}
         </div>
       )}
 
-      <h2 id='family-tree-heading'>
-        Family tree of {rootPerson?.name}
-      </h2>
+      <h2 id="family-tree-heading">Family tree of {rootPerson?.name}</h2>
 
       <div className="tree-zoom-controls">
         <button onClick={() => setTreeZoom(Math.min(treeZoom + 0.1, 1.5))}>
@@ -248,21 +237,17 @@ function App() {
           −
         </button>
 
-        <button onClick={() => setTreeZoom(1)}>
-          Reset
-        </button>
+        <button onClick={() => setTreeZoom(1)}>Reset</button>
       </div>
-      
+
       <div className="main-layout">
         {focusedPersonId !== 1 && (
-          <button
-            onClick={() => setFocusedPersonId(1)}
-          >
+          <button onClick={() => setFocusedPersonId(1)}>
             Back to main tree
           </button>
         )}
 
-        <div className='tree'>
+        <div className="tree">
           <div
             className="tree-content"
             style={{ transform: `scale(${treeZoom})` }}
@@ -286,12 +271,14 @@ function App() {
         />
 
         {selectedPerson && (
-          <div className='person-details'>
+          <div className="person-details">
             <div className="person-details-header">
               <h2>{selectedPerson.name}</h2>
-              <p>{selectedPerson.age} years old - {selectedPerson.gender}</p>
+              <p>
+                {selectedPerson.age} years old - {selectedPerson.gender}
+              </p>
             </div>
-            
+
             <div className="person-actions">
               <button
                 className="primary-action-button"
@@ -306,7 +293,7 @@ function App() {
             </div>
 
             {isEditing && (
-              <div className='edit-section'>
+              <div className="edit-section">
                 <h3>Editing {selectedPerson.name}</h3>
                 <input
                   type="text"
@@ -347,7 +334,7 @@ function App() {
                               name: editName,
                               age: Number(editAge),
                             }),
-                          }
+                          },
                         )
 
                         if (!response.ok) {
@@ -359,9 +346,9 @@ function App() {
                         const updatedFamily = family.map((person) =>
                           person.id === updatedPerson.id
                             ? updatedPerson
-                            : person
+                            : person,
                         )
-  
+
                         setFamily(updatedFamily)
                         setSelectedPerson(updatedPerson)
                         setIsEditing(false)
@@ -373,18 +360,16 @@ function App() {
                   >
                     Save
                   </button>
-                  <button onClick={() => setIsEditing(false)}>
-                    Cancel
-                  </button>
+                  <button onClick={() => setIsEditing(false)}>Cancel</button>
                 </div>
               </div>
             )}
 
             <button
-              className='delete-button'
+              className="delete-button"
               onClick={async () => {
                 const confirmed = window.confirm(
-                  `Delete ${selectedPerson.name}?`
+                  `Delete ${selectedPerson.name}?`,
                 )
 
                 if (!confirmed) {
@@ -396,26 +381,26 @@ function App() {
                     `${import.meta.env.VITE_API_URL}/api/people/${selectedPerson.id}`,
                     {
                       method: "DELETE",
-                    }
+                    },
                   )
 
                   if (!response.ok) {
                     throw new Error("Failed to delete person")
                   }
-                  
+
                   const updatedFamily = family
                     .filter((person) => person.id !== selectedPerson.id)
                     .map((person) => ({
                       ...person,
                       parentIds: person.parentIds.filter(
-                        (id) => id !== selectedPerson.id
+                        (id) => id !== selectedPerson.id,
                       ),
                       spouseId:
                         person.spouseId === selectedPerson.id
                           ? null
                           : person.spouseId,
                     }))
-                  
+
                   setFamily(updatedFamily)
                   setSelectedPerson(null)
                 } catch (error) {
@@ -429,11 +414,11 @@ function App() {
 
             <div className="relationship-section">
               <h3>Parents</h3>
-              
+
               {selectedParents.length > 0 ? (
                 selectedParents.map((parent) => (
                   <button
-                    className='person-link'
+                    className="person-link"
                     key={parent.id}
                     onClick={() => setSelectedPerson(parent)}
                   >
@@ -454,7 +439,7 @@ function App() {
                 Edit Parents
               </button>
             </div>
-            
+
             {isEditingParents && (
               <div>
                 <h3>Edit Parents</h3>
@@ -466,7 +451,7 @@ function App() {
                 />
 
                 <button
-                  className='edit-parents-button'
+                  className="edit-parents-button"
                   onClick={async () => {
                     try {
                       const response = await fetch(
@@ -481,7 +466,7 @@ function App() {
                             age: selectedPerson.age,
                             parentIds: editParentIds,
                           }),
-                        }
+                        },
                       )
 
                       if (!response.ok) {
@@ -489,13 +474,11 @@ function App() {
                       }
 
                       const updatedPerson = await response.json()
-                      
+
                       const updatedFamily = family.map((person) =>
-                        person.id === updatedPerson.id
-                          ? updatedPerson
-                          : person
+                        person.id === updatedPerson.id ? updatedPerson : person,
                       )
-                  
+
                       setFamily(updatedFamily)
                       setSelectedPerson(updatedPerson)
                       setIsEditingParents(false)
@@ -503,13 +486,12 @@ function App() {
                       console.error("Failed to update parents:", error)
                       alert("Failed to update parents.")
                     }
-
                   }}
                 >
                   Save
                 </button>
                 <button
-                  className='edit-parents-button'
+                  className="edit-parents-button"
                   onClick={() => {
                     setIsEditingParents(false)
                   }}
@@ -523,7 +505,7 @@ function App() {
               <h3>Spouse</h3>
               {selectedSpouse ? (
                 <button
-                  className='person-link'
+                  className="person-link"
                   onClick={() => setSelectedPerson(selectedSpouse)}
                 >
                   {selectedSpouse.name}
@@ -538,7 +520,7 @@ function App() {
               {selectedChildren.length > 0 ? (
                 selectedChildren.map((child) => (
                   <button
-                    className='person-link'
+                    className="person-link"
                     key={child.id}
                     onClick={() => setSelectedPerson(child)}
                   >
@@ -561,10 +543,12 @@ function App() {
                   setIsAdding(true)
 
                   setTimeout(() => {
-                    document.getElementById("add-person-section")?.scrollIntoView({
-                      behavior: "smooth",
-                      block: "start",
-                    })
+                    document
+                      .getElementById("add-person-section")
+                      ?.scrollIntoView({
+                        behavior: "smooth",
+                        block: "start",
+                      })
                   }, 0)
                 }}
               >
@@ -595,10 +579,12 @@ function App() {
                   setFocusedPersonId(selectedPerson.id)
 
                   setTimeout(() => {
-                    document.getElementById("family-tree-heading")?.scrollIntoView({
-                      behavior: "smooth",
-                      block: "start",
-                    })
+                    document
+                      .getElementById("family-tree-heading")
+                      ?.scrollIntoView({
+                        behavior: "smooth",
+                        block: "start",
+                      })
                   }, 0)
                 }}
               >
