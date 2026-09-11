@@ -4,6 +4,8 @@ import Person from "./Person"
 import MobileFamilyTree from "./MobileFamilyTree"
 import ParentSelector from "./ParentSelector"
 
+const SEARCH_RESULTS_LIMIT = 8
+
 function App() {
   const [treeZoom, setTreeZoom] = useState(1)
 
@@ -132,6 +134,7 @@ function App() {
             family={family}
             selectedParentIds={newParentIds}
             onChange={setNewParentIds}
+            SEARCH_RESULTS_LIMIT={SEARCH_RESULTS_LIMIT}
           />
 
           <div className="form-actions">
@@ -208,8 +211,10 @@ function App() {
 
       {searchTerm && (
         <div className="search-results">
-          {searchResults.length > 0 ? (
-            searchResults.map((person) => (
+          {searchResults.length === 0 ? (
+            <p>No family members found.</p>
+          ) : (
+            searchResults.slice(0, SEARCH_RESULTS_LIMIT).map((person) => (
               <button
                 key={person.id}
                 onClick={() => {
@@ -220,10 +225,10 @@ function App() {
                     document
                       .getElementById(`person-${person.id}`)
                       ?.scrollIntoView({
-                    behavior: "smooth",
-                    block: "center",
-                    inline: "center",
-                  })
+                        behavior: "smooth",
+                        block: "center",
+                        inline: "center",
+                      })
                   }
                 }}
               >
@@ -233,8 +238,13 @@ function App() {
                 </div>
               </button>
             ))
-          ) : (
-            <div className="no-search-results">No family member found.</div>
+          )}
+
+          {searchResults.length > SEARCH_RESULTS_LIMIT && (
+            <p>
+              Showing first {SEARCH_RESULTS_LIMIT} results of{" "}
+              {searchResults.length}. Refine your search to see more.
+            </p>
           )}
         </div>
       )}
@@ -461,6 +471,7 @@ function App() {
                   family={family}
                   selectedParentIds={editParentIds}
                   onChange={setEditParentIds}
+                  SEARCH_RESULTS_LIMIT={SEARCH_RESULTS_LIMIT}
                 />
 
                 <button
@@ -543,6 +554,7 @@ function App() {
               ) : (
                 <p>No children</p>
               )}
+
               <button
                 className="action-button"
                 onClick={() => {

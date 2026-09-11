@@ -1,6 +1,11 @@
 import { useState } from "react"
 
-function ParentSelector({ family, selectedParentIds, onChange }) {
+function ParentSelector({
+  family,
+  selectedParentIds,
+  onChange,
+  SEARCH_RESULTS_LIMIT,
+}) {
   const [search, setSearch] = useState("")
 
   const matchingParents = family.filter(
@@ -78,7 +83,7 @@ function ParentSelector({ family, selectedParentIds, onChange }) {
           {matchingParents.length === 0 ? (
             <p>No family members found.</p>
           ) : (
-            matchingParents.slice(0, 8).map((person) => (
+            matchingParents.slice(0, SEARCH_RESULTS_LIMIT).map((person) => (
               <label
                 key={person.id}
                 className="parent-result"
@@ -111,10 +116,10 @@ function ParentSelector({ family, selectedParentIds, onChange }) {
             ))
           )}
 
-          {matchingParents.length > 8 && (
+          {matchingParents.length > SEARCH_RESULTS_LIMIT && (
             <p>
-              Showing first 8 results of {matchingParents.length}. Refine your
-              search to see more.
+              Showing first {SEARCH_RESULTS_LIMIT} results of{" "}
+              {matchingParents.length}. Refine your search to see more.
             </p>
           )}
         </>
