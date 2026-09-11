@@ -6,7 +6,7 @@ const personSchema = new mongoose.Schema({
     required: true,
     unique: true,
   },
-  
+
   name: {
     type: String,
     required: true,

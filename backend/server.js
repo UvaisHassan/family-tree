@@ -12,7 +12,8 @@ const app = express()
 app.use(cors())
 app.use(express.json())
 
-mongoose.connect(process.env.MONGODB_URI)
+mongoose
+  .connect(process.env.MONGODB_URI)
   .then(() => {
     console.log("Connected to MongoDB")
   })
@@ -70,13 +71,13 @@ app.delete("/api/people/:id", async (req, res) => {
     // Remove this person from other people's parent relationships
     await Person.updateMany(
       { parentIds: personId },
-      { $pull: { parentIds: personId } }
+      { $pull: { parentIds: personId } },
     )
 
     // Remove this person from anyone's spouse relationship
     await Person.updateMany(
       { spouseId: personId },
-      { $set: { spouseId: null } }
+      { $set: { spouseId: null } },
     )
 
     res.json(person)
@@ -101,7 +102,7 @@ app.put("/api/people/:id", async (req, res) => {
         age: req.body.age,
         parentIds: req.body.parentIds,
       },
-      { new: true, runValidators: true }
+      { new: true, runValidators: true },
     )
 
     if (!person) {
@@ -125,9 +126,7 @@ app.put("/api/people/:id/spouse", async (req, res) => {
   try {
     const personId = Number(req.params.id)
     const spouseId =
-      req.body.spouseId === null
-        ? null
-        : Number(req.body.spouseId)
+      req.body.spouseId === null ? null : Number(req.body.spouseId)
 
     const person = await Person.findOne({ id: personId })
 
@@ -151,14 +150,14 @@ app.put("/api/people/:id/spouse", async (req, res) => {
       if (person.spouseId !== null) {
         await Person.findOneAndUpdate(
           { id: person.spouseId },
-          { spouseId: null }
+          { spouseId: null },
         )
       }
 
       if (spouse.spouseId !== null) {
         await Person.findOneAndUpdate(
           { id: spouse.spouseId },
-          { spouseId: null }
+          { spouseId: null },
         )
       }
 
@@ -171,7 +170,7 @@ app.put("/api/people/:id/spouse", async (req, res) => {
       if (person.spouseId !== null) {
         await Person.findOneAndUpdate(
           { id: person.spouseId },
-          { spouseId: null }
+          { spouseId: null },
         )
       }
 
